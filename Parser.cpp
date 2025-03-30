@@ -28,7 +28,7 @@ void Parser::parseLine() {
 
 void Parser::parseLabel() {
     Token labelToken = consume();
-    std::string labelName = labelToken.data.substr(0, labelToken.data.size() - 1); // Убираем ':'
+    std::string labelName = labelToken.data.substr(0, labelToken.data.size() - 1); 
 
     labels[labelName] = Label{ labelName, current_address };
 }
