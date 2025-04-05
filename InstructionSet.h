@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
-#include <type_traits> //  std::underlying_type_t
+#include <type_traits>
 
 enum class OperandType : uint8_t {
     NONE = 0,    

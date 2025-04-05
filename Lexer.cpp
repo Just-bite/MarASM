@@ -18,9 +18,9 @@ void Lexer::trackPosition()
 
 void Lexer::putMatchingTokenInTokenList(TokenStructure tokenType,std::smatch match)
 {
-	if (tokenType.type != TokenType::SPACE)
+	if (tokenType.type != TokenTypes::SPACE)
 	{
-		if (tokenType.type == TokenType::NEWLINE)
+		if (tokenType.type == TokenTypes::NEWLINE)
 			trackPosition();
 
 		Token token = Token(tokenType.type, match.str(), this->pos, this->line);
