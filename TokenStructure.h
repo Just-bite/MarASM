@@ -18,7 +18,7 @@ enum class TokenType {
     PLUS,         // +
     MINUS,        // -
     ASSIGN,       // =
-    AT,           //@
+    AT,           // @
     COMMENT,      // ; 
     NEWLINE,       // \n
     END,           // \0
@@ -45,10 +45,9 @@ const std::vector<TokenStructure> Token_patterns = {
     TokenStructure(TokenType::NUMBER, R"(^(0x[0-9A-Fa-f]+|0[0-7]*|[1-9]\d*))", "NUMBER"),
     TokenStructure(TokenType::NEWLINE, R"(^\n\s*)", "NEWLINE"),
     TokenStructure(TokenType::COMMA, R"(^,)", "COMMA"),
-    TokenStructure(TokenType::SPACE, R"(^[ \t\r]+)", "SPACE"),
     TokenStructure(TokenType::LABEL, R"(^[A-Za-z_]\w*:)", "LABEL"),
+    TokenStructure(TokenType::SPACE, R"(^[ \t\r]+)", "SPACE"),
     TokenStructure(TokenType::DIRECTIVE, R"(^\.[A-Za-z][A-Za-z0-9]*)", "DIRECTIVE"),
-    
     TokenStructure(TokenType::LPAREN, R"(^\()", "LPAREN"),
     TokenStructure(TokenType::RPAREN, R"(^\))", "RPAREN"),
     TokenStructure(TokenType::PLUS, R"(^\+)", "PLUS"),

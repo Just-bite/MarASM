@@ -13,7 +13,7 @@ public:
 	int pos = 0;
 	std::vector<Token> token_list;
 
-	Lexer(const char* code) : code(code) {};
+	Lexer(std::string code) : code(code) {};
 
 	std::vector<Token> lexAnalisis();
 

@@ -1,11 +1,12 @@
 ﻿#pragma once
+#define _SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS
 #include "Token.h"
 #include <stdexcept>
 #include <cctype>
 #include <vector>
 #include <string>
 #include <map>
-
+#include <hash_map>
 
 enum class OperandType {
     REGISTER,     // R0-R7
@@ -19,14 +20,12 @@ enum class OperandType {
     INDIRECT_AUTOINC  // @(R6)+
 };
 
-
 struct Operand {
     OperandType type;
     int value;          
     int index_reg;      
     std::string label;  
 };
-
 
 struct Instruction {
     std::string mnemonic;
@@ -41,7 +40,6 @@ struct Directive {
     std::vector<int> data; 
     int size;              
 };
-
 
 struct Label {
     std::string name;
@@ -66,7 +64,7 @@ private:
     std::vector<Instruction> instructions;
     std::vector<Directive> directives;
     std::map<std::string, Label> labels;
-    int current_address = 0; 
+    int current_address = 0;
 
     Token peek() const;
     Token consume();
@@ -93,3 +91,5 @@ private:
     int calculateInstructionSize(const Instruction& instr) const;
     int parseNumber(const std::string& s) const;
 };
+
+
