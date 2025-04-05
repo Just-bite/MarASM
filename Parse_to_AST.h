@@ -9,6 +9,7 @@ class Parse_to_AST
 {
 public:
 	int pos = 0;
+	int line = 0;
 	int currentAdress = 0;
 	Parse_to_AST(std::vector<Token> tokens) : tokens(tokens) {};
 	ASTRoot getASTForest();
@@ -21,7 +22,7 @@ public:
 	bool isLabel();
 	bool isInstruction();
 	bool isNewLine();
-	bool match(TokenType);
+	bool match(TokenTypes);
 
 	AST* parseDirective();
 	AST* parseLabel();

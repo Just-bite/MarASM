@@ -2,6 +2,22 @@
 #include <string>
 #include <vector>
 
+enum class AdressTypes {
+    REGISTER,                   // Rn
+    REGISTER_INDIRECT,          // (Rn)
+    AUTOINCREMENT,              // (Rn)+
+    AUTOINCREMENT_INDIRECT,     // @(Rn)+
+    AUTODECREMENT,              // -(Rn)
+    AUTODECREMENT_IDIRECT,      // @-(Rn)
+    INDEXED,                    // X(Rn)
+    INDEXED_INDIRECT,           // @X(Rn)
+    IMMEDIATE,                  // #N
+    ABSOLUTE,                   // @#A
+    RELATIVE,                   // label
+};
+
+
+
 class AST { public: virtual ~AST() {} };
 
 class ASTRoot : public AST {
@@ -12,78 +28,63 @@ public:
     }
 };
 
-class RegisterExpr : public AST
+class RegisterNode : public AST
 { 
 public:
-    int reg;
-    bool is_sp = false; //R6
-    bool is_pc = false; //R7
-    RegisterExpr(int reg_num) : reg(reg_num) {} 
+    int register_number;
+    AdressTypes adress_type;
+    bool is_sp = false; // R6
+    bool is_pc = false; // R7
+    RegisterNode(int register_number) : register_number(register_number) {} 
 };
 
-class RegisterIndirectExpr : public AST
-{
-public:
-    int reg;
-    RegisterIndirectExpr(int r) : reg(r) {}
-};
-
-class AutoIncrementExpr : public AST 
-{
-public:
-    int reg;
-    AutoIncrementExpr(int r) : reg(r) {}
-};
-
-class ImmediateExpr : public AST
-{
-public:
-    int value;
-    bool is_char = false;
-    ImmediateExpr(int v) : value(v) {}
-};
-
-class NumberExpr : public AST
+class NumberNode : public AST
 {
 public:
     int number;
-    NumberExpr(int number) : number(number) {}
+    AdressTypes adress_type;
+    NumberNode(int number) : number(number) {}
 };
 
 
 
-class LabelExpr : public AST 
+class LabelNode : public AST 
 {
 public: 
+    int adress;
     std::string name; 
-    LabelExpr(std::string n) : name(n) {}
+    AdressTypes adress_type = AdressTypes::RELATIVE;
+    LabelNode(std::string name) : name(name) {}
 };
 
-class BranchExpr : public AST
+class BranchNode : public AST
 {
 public:
     std::string target; 
-    BranchExpr(std::string t) : target(t) {}
+    AdressTypes adress_type;
+    BranchNode(std::string t) : target(t) {}
 };
 
 
-class InstructionExpr : public AST 
+class InstructionNode : public AST 
 {
 public: 
-    std::string opcode;
     int size;
+    std::string mnemonic;
+    uint16_t opcode;
+    uint16_t op_mask;
     AST* src;  
     AST* dest;
-    InstructionExpr(){};
-    InstructionExpr(int size,std::string op, AST* s, AST* d) : size(size), opcode(op), src(s), dest(d) {}
+    InstructionNode(){};
+    InstructionNode(int size,std::string op, AST* s, AST* d) : size(size), opcode(op), src(s), dest(d) {}
 };
 
 
-class DirectiveExpr : public AST {
+class DirectiveNode : public AST {
 public:
     std::string name;  
     std::vector<int> data;
-    int size;
-    DirectiveExpr() {};
-    DirectiveExpr(std::string name, std::vector<int> data) : name(name), data(data) {}
+    int size = 0;
+    DirectiveNode() {};
+    DirectiveNode(std::string name, std::vector<int> data) : name(name), data(data) {}
 };

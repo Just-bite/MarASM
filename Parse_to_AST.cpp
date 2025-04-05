@@ -1,24 +1,25 @@
 #include "Parse_to_AST.h"
+#include "TokenStructure.h"
 
 bool Parse_to_AST::isDirective()
 {
-	return peek().data_type == TokenType::DIRECTIVE;
+	return peek().type == TokenTypes::DIRECTIVE;
 }
 bool Parse_to_AST::isLabel()
 {
-	return peek().data_type == TokenType::LABEL;
+	return peek().type == TokenTypes::LABEL;
 }
 bool Parse_to_AST::isInstruction()
 {
-	return peek().data_type == TokenType::INSTRUCTION;
+	return peek().type == TokenTypes::INSTRUCTION;
 }
 bool Parse_to_AST::isNewLine()
 {
-	return peek().data_type == TokenType::NEWLINE;
+	return peek().type == TokenTypes::NEWLINE;
 }
-bool Parse_to_AST::match(TokenType type)
+bool Parse_to_AST::match(TokenTypes type)
 {
-	return peek().data_type == type;
+	return peek().type == type;
 }
 
 ASTRoot Parse_to_AST::getASTForest()
@@ -36,7 +37,7 @@ Token Parse_to_AST::consume()
 	if (pos < tokens.size())
 		return tokens[pos++];
 	else
-		return Token(TokenType::END,"",pos);
+		return Token(TokenTypes::END,"",pos,line);
 }
 
 void Parse_to_AST::parseCode()
@@ -61,21 +62,27 @@ AST* Parse_to_AST::parseLine()
 
 	if (isNewLine()) {
 		pos++;
+		line++;
 		return nullptr;
 	}
 	
 }
 
 AST* Parse_to_AST::parseDirective() {
-	DirectiveExpr* node = new DirectiveExpr();
+	DirectiveNode* node = new DirectiveNode();
 	Token token = consume();
 	node->name = token.data;
 
-	while (pos < tokens.size() && !match(TokenType::NEWLINE)) {
+	while (pos < tokens.size() && !match(TokenTypes::NEWLINE)) {
 		Token numToken = consume();
-		if (numToken.data_type == TokenType::NUMBER || numToken.data_type == TokenType::IMMEDIATE) {
+		if (numToken.type == TokenTypes::NUMSIGN) 
+			token = consume();
+
+		if (numToken.type == TokenTypes::NUMERIC) {
 			node->data.push_back(stoi(numToken.data));
+			node->size += 2;
 		}
+		
 		else {
 			delete node; 
 			throw std::runtime_error("Expected number in directive");
@@ -88,21 +95,31 @@ AST* Parse_to_AST::parseDirective() {
 AST* Parse_to_AST::parseLabel()
 {
 	Token token = consume();
-	return new LabelExpr(token.data.substr(0, token.data.size() - 1));
+	return new LabelNode(token.data.substr(0, token.data.size() - 1));
 	
 }
 
 AST* Parse_to_AST::parseInstruction() {
 	Token mnemonicToken = consume();
-	InstructionExpr* instr = new InstructionExpr();
-	instr->opcode = mnemonicToken.data;
+	InstructionNode* instr = new InstructionNode();
+	instr->mnemonic = mnemonicToken.data;
 
-	if (instr->opcode != "HALT" && instr->opcode != "NOP") {
-		if (match(TokenType::REGISTER) || match(TokenType::NUMBER)) {
+	if (instr->mnemonic != "HALT" && instr->mnemonic != "NOP") {
+		if (match(TokenTypes::AT))
+			processATAdressing();
+		if (match(TokenTypes::MINUS))
+			processAutoDecrement();
+
+		if (match(TokenTypes::NUMSIGN)) //дописать для отсальных типов памяти
+			processImmediate();
+
+		if (match(TokenTypes::NUMERIC))
+			processIndex();
+		if (match(TokenTypes::REGISTER) || match(TokenTypes::NUMERIC)) {
 			instr->src = parseOperand(consume());
 		}
 
-		if (match(TokenType::COMMA)) {
+		if (match(TokenTypes::COMMA)) {
 			consume();
 			instr->dest = parseOperand(consume());
 		}
@@ -116,14 +133,14 @@ AST* Parse_to_AST::parseInstruction() {
 AST* Parse_to_AST::parseOperand(const Token& token) {
 
 	AST operand;
-	if (token.data_type == TokenType::REGISTER) {
-		return new RegisterExpr(std::stoi(token.data.substr(1)));		
+	if (token.type == TokenTypes::REGISTER) {
+		return new RegisterNode(std::stoi(token.data.substr(1)));		
 	}
   
-    else if (token.data_type == TokenType::NUMBER) {
-		return new NumberExpr(std::stoi(token.data.substr(1)));
+    else if (token.type == TokenTypes::NUMERIC) {
+		return new NumberNode(std::stoi(token.data.substr(1)));
     }
-    else if (token.data_type == TokenType::IMMEDIATE) {
+    /*else if (token.type == TokenType::IMMEDIATE) {
         if (token.data[0] == '#') {
 			return new ImmediateExpr(std::stoi(token.data.substr(1)));
         }
@@ -133,6 +150,6 @@ AST* Parse_to_AST::parseOperand(const Token& token) {
     }
     else {
         throw std::runtime_error("Invalid operand: " + token.data);
-    }
+    }*/
 
 }

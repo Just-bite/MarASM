@@ -5,10 +5,11 @@
 class Token
 {
 public:
-    TokenType data_type;//token type
-    std::string data; //current token data
-    int pos;
+    TokenTypes type;
+    std::string data; 
+    int position;
+    int line;
 
-    Token(const TokenType data_type,std::string data, int pos) : data_type(data_type), data(data), pos(pos) {};
+    Token(const TokenTypes type,std::string data, int pos,int line) : type(type), data(data), position(pos),line(line) {};
 };
 

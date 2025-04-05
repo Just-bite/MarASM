@@ -1,41 +1,64 @@
 #include "Lexer.h"
 
-std::vector<Token> Lexer::lexAnalisis()
+std::vector<Token> Lexer::runLexAnalisis()
 {
-	while (this->nextToken());
+	while (this->isInAnalisys());
 	return this->token_list;
 }
 
-
-bool Lexer::nextToken()
+std::vector<Token> Lexer::getTokenList()
 {
+	return this->token_list;
+}
+
+void Lexer::trackPosition()
+{
+	this->line++;
+}
+
+void Lexer::putMatchingTokenInTokenList(TokenStructure tokenType,std::smatch match)
+{
+	if (tokenType.type != TokenType::SPACE)
+	{
+		if (tokenType.type == TokenType::NEWLINE)
+			trackPosition();
+
+		Token token = Token(tokenType.type, match.str(), this->pos, this->line);
+		this->token_list.push_back(token);
+	}
+	this->pos += match.str().length();
+}
+
+bool Lexer::isInAnalisys() 
+{
+		if (this->pos >= this->source_code.length())
+			return false;
+		
+		return analiseTokenBasedOnPatterns();
+}
+
+bool Lexer::analiseTokenBasedOnPatterns()
+{	
 	try
 	{
-		if (this->pos >= this->code.length())
-		{
-			return false;
-		}
-		const auto token_list = Token_patterns;
-		for (const auto& tokenType : Token_patterns)
+		int error_flag = 0;
+		const auto token_list = token_patterns;
+		for (const auto& tokenType : token_patterns)
 		{
 			std::smatch match;
-			std::string remaining_code = this->code.substr(this->pos);
-			if (std::regex_search(remaining_code, match, tokenType.regex)) {
+			std::string remaining_code = this->source_code.substr(this->pos);
+			if (std::regex_search(remaining_code, match, tokenType.regex)) 
+			{
 				if (!match.str().empty())
 				{
-					if (tokenType.token_name != "SPACE")
-					{
-						Token token = Token(tokenType.type, match.str(), this->pos);
-						this->token_list.push_back(token);
-					}
-					this->pos += match.str().length();
+					putMatchingTokenInTokenList(tokenType,match);
 					return true;
 				}
 			}
 		}
-		throw std::invalid_argument("error at pos ");
+		throw std::invalid_argument("Lexical: error at line ");
 	}
 	catch (const std::invalid_argument& e) {
-		std::cerr << "Lexical: " << e.what() << this->pos << std::endl;
+		std::cerr << e.what() << this->line <<"pos"<<this->pos << std::endl;
 	}
 }

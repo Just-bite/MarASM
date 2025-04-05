@@ -1,5 +1,4 @@
 #include "Lexer.h"
-#include "Parser.h"
 #include "Parse_to_AST.h"
 
 int main()
@@ -7,19 +6,29 @@ int main()
 	std::string code =
 		R"(
 		MOV R2, R1
-		ADD R1, R3
+		MOV (R1),R2
+		MOV (R1)+,R2
+		MOV -(R1),R2
+		MOV @-(R1),R2
+		MOV @(R1)+,R2
+		MOV 42(R1),R2
+		MOV @42(R1),R2
+		MOV #42,R2
+		MOV @#1000,R2
+		JMP LABEL
 		CLR R4 	
 		LABEL:
 	    .WORD 42)";
 	Lexer lexer(code);
-	lexer.lexAnalisis();
-	for (int i = 0; i < lexer.token_list.size(); i++)
+	lexer.runLexAnalisis();
+	for (const auto elements: lexer.getTokenList())
 	{
-		std::cout << lexer.token_list[i].data << std::endl;
+		std::cout << elements.data <<" ";
 	}
-	Parse_to_AST parser(lexer.token_list);
+	std::cout << std::endl;
+	/*Parse_to_AST parser(lexer.getTokenList());
 	parser.parseCode();
 	ASTRoot root = parser.getASTForest();
 	int poslock = parser.currentAdress;
-	std::cout << poslock << std::endl;
+	std::cout << poslock << std::endl;*/
 }
